@@ -5,6 +5,7 @@ using UnityEngine;
 public class Spawner : MonoBehaviour {
 
 	[SerializeField] List<GameObject> Shapes;
+    [SerializeField] Material material;
     int TotalShape;
 	void Start () {
         TotalShape = Shapes.Count;

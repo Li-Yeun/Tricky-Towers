@@ -1,22 +1,32 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour {
 
-    [SerializeField] GameObject RedBlock,BlueBlock, GhostBlocksRed, GhostBlocksBlue, DeleteBlock;
+    [SerializeField] GameObject RedBlock, BlueBlock, GhostBlocksRed, GhostBlocksBlue, DeleteBlock;
     [SerializeField] Abilities Ability;
     [SerializeField] string Player;
     [SerializeField] Transform Field;
-    [SerializeField] float MinimumDistance = 2f;
+    [SerializeField] float MinimumDistance = 2f, BlockSpawnDistance;
+    [SerializeField] Material m_Material;
+    [SerializeField] Image[] Images;
+    [SerializeField] Color m_Color;
+    public bool LockMovement = false;
+    Material c_Material;
+    Color c_Color;
     GameObject CurrentBlock, DeleteBlocks, DeletingBlock = null;
     GameObject Player1GhostBLockRed, Player1GhostBLockBlue, Player1GhostBLockCurrent;
-
+    Rigidbody rigidbody;
     float timer;
-    float Speed = 3f, Delay = 1f;
+    float Speed = 4f, Delay = 1f;
+
+    Vector3 prevPos;
     bool Lock = false, Deletes = false;
 	// Use this for initialization
 	void Start () {
+        rigidbody = GetComponent<Rigidbody>();
         CurrentBlock = RedBlock;
         Player1GhostBLockRed = Instantiate(GhostBlocksRed);
         Player1GhostBLockBlue = Instantiate(GhostBlocksBlue);
@@ -24,6 +34,10 @@ public class PlayerMovement : MonoBehaviour {
         Player1GhostBLockBlue.SetActive(false);
         Player1GhostBLockCurrent = Player1GhostBLockRed;
         CheckRow(transform.position.x + 0.5f);
+        rigidbody = GetComponent<Rigidbody>();
+        rigidbody.velocity = Vector3.zero;
+        c_Material = GetComponent<Renderer>().material;
+        c_Color = Images[0].color;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -35,12 +49,17 @@ public class PlayerMovement : MonoBehaviour {
     }
     void Update ()
     {
-        if(Player == "Red")
-            Player1Movement();
-        else
-            Player2Movement();
+        if (LockMovement == false)
+        {
+            if (Player == "Red")
+                Player1Movement();
+            else
+                Player2Movement();
 
-        CheckDeleteBlock(); 
+            CheckDeleteBlock();
+        }
+        else
+            return;
     }
 
     private void Player1Movement()
@@ -49,21 +68,25 @@ public class PlayerMovement : MonoBehaviour {
         {
             transform.Translate(Vector3.up * Time.deltaTime * Speed);
             CheckRow(transform.position.x + 0.5f);
+            rigidbody.velocity = Vector3.zero;
         }
         if (Input.GetKey(KeyCode.A))
         {
             transform.Translate(Vector3.left * Time.deltaTime * Speed);
             CheckRow(transform.position.x + 0.5f);
+            rigidbody.velocity = Vector3.zero;
         }
         if (Input.GetKey(KeyCode.S))
         {
             transform.Translate(Vector3.down * Time.deltaTime * Speed);
             CheckRow(transform.position.x + 0.5f);
+            rigidbody.velocity = Vector3.zero;
         }
         if (Input.GetKey(KeyCode.D))
         {
             transform.Translate(Vector3.right * Time.deltaTime * Speed);
             CheckRow(transform.position.x + 0.5f);
+            rigidbody.velocity = Vector3.zero;
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
@@ -78,7 +101,7 @@ public class PlayerMovement : MonoBehaviour {
                 }
                 else
                 {
-                    Instantiate(CurrentBlock, new Vector3(Player1GhostBLockCurrent.transform.position.x, this.transform.position.y - 2f, -0.03f), Quaternion.Euler(0, 0, 0), Field);
+                    Instantiate(CurrentBlock, new Vector3(Player1GhostBLockCurrent.transform.position.x, this.transform.position.y - 2f - BlockSpawnDistance, -0.03f), Quaternion.Euler(0, 0, 0), Field);
                 }
                 Ability.Lock = true;
                 Ability.UsingAbility();
@@ -89,6 +112,11 @@ public class PlayerMovement : MonoBehaviour {
         {
             if (CurrentBlock == RedBlock)
             {
+                GetComponent<Renderer>().material = m_Material;
+                foreach(Image image in Images)
+                {
+                    image.color = m_Color;
+                }
                 CurrentBlock = BlueBlock;
                 Player1GhostBLockBlue.SetActive(true);
                 Player1GhostBLockRed.SetActive(false);
@@ -97,6 +125,11 @@ public class PlayerMovement : MonoBehaviour {
             }
             else
             {
+                GetComponent<Renderer>().material = c_Material;
+                foreach (Image image in Images)
+                {
+                    image.color = c_Color;
+                }
                 CurrentBlock = RedBlock;
                 Player1GhostBLockBlue.SetActive(false);
                 Player1GhostBLockRed.SetActive(true);
@@ -119,21 +152,25 @@ public class PlayerMovement : MonoBehaviour {
         {
             transform.Translate(Vector3.up * Time.deltaTime * Speed);
             CheckRow(transform.position.x + 0.5f);
+            rigidbody.velocity = Vector3.zero;
         }
         if (Input.GetKey(KeyCode.LeftArrow))
         {
             transform.Translate(Vector3.left * Time.deltaTime * Speed);
             CheckRow(transform.position.x + 0.5f);
+            rigidbody.velocity = Vector3.zero;
         }
         if (Input.GetKey(KeyCode.DownArrow))
         {
             transform.Translate(Vector3.down * Time.deltaTime * Speed);
             CheckRow(transform.position.x + 0.5f);
+            rigidbody.velocity = Vector3.zero;
         }
         if (Input.GetKey(KeyCode.RightArrow))
         {
             transform.Translate(Vector3.right * Time.deltaTime * Speed);
             CheckRow(transform.position.x + 0.5f);
+            rigidbody.velocity = Vector3.zero;
         }
 
         if (Input.GetKeyDown(KeyCode.RightAlt))
@@ -159,6 +196,11 @@ public class PlayerMovement : MonoBehaviour {
         {
             if (CurrentBlock == RedBlock)
             {
+                GetComponent<Renderer>().material = m_Material;
+                foreach (Image image in Images)
+                {
+                    image.color = m_Color;
+                }
                 CurrentBlock = BlueBlock;
                 Player1GhostBLockBlue.SetActive(true);
                 Player1GhostBLockRed.SetActive(false);
@@ -167,6 +209,11 @@ public class PlayerMovement : MonoBehaviour {
             }
             else
             {
+                GetComponent<Renderer>().material = c_Material;
+                foreach (Image image in Images)
+                {
+                    image.color = c_Color;
+                }
                 CurrentBlock = RedBlock;
                 Player1GhostBLockBlue.SetActive(false);
                 Player1GhostBLockRed.SetActive(true);
@@ -193,7 +240,7 @@ public class PlayerMovement : MonoBehaviour {
         {
             for (int i = 1; i <= 10; i++)
             {
-                if (xPos > i && xPos < i + 1)
+                if (xPos >= i && xPos < i + 1)
                 {
                     Player1GhostBLockCurrent.transform.position = new Vector3(i, 5.5f, 0f);
                     return;
